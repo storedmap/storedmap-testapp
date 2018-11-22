@@ -9,6 +9,7 @@ import com.vsetec.storedmap.Category;
 import com.vsetec.storedmap.Store;
 import com.vsetec.storedmap.StoredMap;
 import com.vsetec.storedmap.jdbc.GenericJdbcDriver;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,21 +34,31 @@ public class App {
                 + "create index @{indexName}_ind1 on @{indexName}_indx (sort, tag);\n"
                 + "create index @{indexName}_ind2 on @{indexName}_indx (id)");
 
-        Store store = Store.get(postgres);
+        Store store = Store.getStore(postgres);
 
-        Category category = store.getCategory("themap");
+        Category category = store.get("themap");
 
-        for (int i = 0; i < 4; i++) {
-            StoredMap map = category.getMap("map" + i);
+        for (int i = 0; i < 2; i++) {
+            StoredMap map = category.map("map" + i);
 
             for (int j = 0; j < 4; j++) {
                 map.put("key" + j, "value" + j + " of map " + i);
             }
-
         }
 
-        System.out.println("Maps in category " + category.getName() + ":");
-        for (StoredMap map : category.getMaps()) {
+        for (int i = 2; i < 4; i++) {
+            HashMap<String,Object> map = new HashMap<>();
+            for (int j = 0; j < 4; j++) {
+                map.put("key" + j, "value" + j + " of map " + i + " that was put in a different way");
+            }
+            // testing map interface
+            category.put("map" + i, map);
+
+        }
+        
+        
+        System.out.println("Maps in category " + category.name() + ":");
+        for (StoredMap map : category.maps()) {
             System.out.println("Map id:\t" + map.key());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
