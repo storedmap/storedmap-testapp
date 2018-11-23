@@ -58,38 +58,40 @@ public class App {
 
         Store store = Store.getStore(elasticsearch);
 
-        Category category = store.get("Русский");
+        String[]categoryNames = new String[]{
+            "themap",
+            "aMap",
+            "very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very LONG NAME",
+            "По-русски",
+            "_underscore"
+        };
+        
+        
+        for(String cat: categoryNames){
+        
+            Category category = store.get(cat);
 
-        for (int i = 0; i < 2; i++) {
-            StoredMap map = category.map("map" + i);
+            for (int i = 0; i < 2; i++) {
+                StoredMap map = category.map("map" + i);
 
-            for (int j = 0; j < 4; j++) {
-                map.put("key" + j, "value" + j + " of map " + i);
+                for (int j = 0; j < 4; j++) {
+                    map.put("key" + j, "value" + j + " of map " + i + " in a category " + category.name());
+                }
             }
-        }
 
-        for (int i = 2; i < 4; i++) {
-            HashMap<String, Object> map = new HashMap<>();
-            for (int j = 0; j < 4; j++) {
-                map.put("key" + j, "value" + j + " of map " + i + " that was put in a different way");
-            }
-            // testing map interface
-            category.put("map" + i, map);
-
-        }
-
-        System.out.println("\nMaps in category " + category.name() + ":");
-        for (StoredMap map : category.maps()) {
-            System.out.println("\nMap id:\t" + map.key());
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-            }
         }
 
         System.out.println("\nCategories:");
         
-        for(Category cat: store.categories()){
-                System.out.println("Name:\t" + cat.name());
+        for(Category category: store.categories()){
+            System.out.println("\nMaps in category " + category.name() + ":");
+            System.out.println("\n(internal name - " + category.internalIndexName()+ ")");
+            for (StoredMap map : category.maps()) {
+                System.out.println("\nMap id:\t" + map.key());
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+                }
+            }
         }
 
         store.close();
