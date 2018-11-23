@@ -9,11 +9,13 @@ import com.vsetec.storedmap.Category;
 import com.vsetec.storedmap.MixedDriver;
 import com.vsetec.storedmap.Store;
 import com.vsetec.storedmap.StoredMap;
+import com.vsetec.storedmap.Util;
 import com.vsetec.storedmap.elasticsearch.ElasticsearchDriver;
 import com.vsetec.storedmap.jdbc.GenericJdbcDriver;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.commons.codec.binary.Base32;
 
 /**
  *
@@ -23,6 +25,11 @@ public class App {
 
     public static void main(String[] args) {
 
+//        Base32 b32 = new Base32(true);
+//        
+//        for(double i=-10.00; i<10.00; i=i+0.1){
+//            System.out.println(i + ": \t" + b32.encodeAsString(Util.translateSorterIntoBytes(i, null, 32)));
+//        }
         Properties elasticsearch = new Properties();
         elasticsearch.setProperty("storedmap.applicationCode", "testapp");
         elasticsearch.setProperty("storedmap.driver", ElasticsearchDriver.class.getName());
@@ -56,38 +63,45 @@ public class App {
         mixed.setProperty("storedmap.driver.main", GenericJdbcDriver.class.getName());
         mixed.setProperty("storedmap.driver.additional", ElasticsearchDriver.class.getName());
 
-        Store store = Store.getStore(elasticsearch);
+        Store store = Store.getStore(postgres);
 
-        String[]categoryNames = new String[]{
+        String[] categoryNames = new String[]{
             "themap",
-            "aMap",
-            "very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very LONG NAME",
-            "По-русски",
-            "_underscore"
+            "aMap"
+        //"very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very LONG NAME",
+        //"По-русски",
+        //"_underscore"
         };
-        
-        
-        for(String cat: categoryNames){
-        
+
+        for (String cat : categoryNames) {
+
             Category category = store.get(cat);
 
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 4; i++) {
                 StoredMap map = category.map("map" + i);
 
-                for (int j = 0; j < 4; j++) {
+                for (int j = 0; j < 2; j++) {
                     map.put("key" + j, "value" + j + " of map " + i + " in a category " + category.name());
                 }
+
+                if (i == 3) {
+                    map.tags(new String[]{"odd", "third"});
+                } else if ((i & 1) != 0) {
+                    map.tags(new String[]{"odd"});
+                }
+                map.sorter(i);
             }
 
         }
 
         System.out.println("\nCategories:");
-        
-        for(Category category: store.categories()){
+
+        for (Category category : store.categories()) {
             System.out.println("\nMaps in category " + category.name() + ":");
-            System.out.println("\n(internal name - " + category.internalIndexName()+ ")");
+            System.out.println("(internal name - " + category.internalIndexName() + ")");
             for (StoredMap map : category.maps()) {
                 System.out.println("\nMap id:\t" + map.key());
+                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
                 }
@@ -95,5 +109,6 @@ public class App {
         }
 
         store.close();
+
     }
 }
