@@ -12,6 +12,7 @@ import com.vsetec.storedmap.StoredMap;
 import com.vsetec.storedmap.Util;
 import com.vsetec.storedmap.elasticsearch.ElasticsearchDriver;
 import com.vsetec.storedmap.jdbc.GenericJdbcDriver;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
@@ -46,7 +47,7 @@ public class App {
         postgres.setProperty("storedmap.jdbc.queries.create",
                 "create table @{indexName}_main (id varchar(200) primary key, val bytea);\n"
                 + "create table @{indexName}_lock (id varchar(200) primary key, createdat timestamp, waitfor integer);\n"
-                + "create table @{indexName}_indx (id varchar(200), tag varchar(200), sort varchar(200), map text, primary key (tag, id));\n"
+                + "create table @{indexName}_indx (id varchar(200), tag varchar(200), sort bytea, map text, primary key (tag, id));\n"
                 + "create index @{indexName}_ind1 on @{indexName}_indx (sort, tag);\n"
                 + "create index @{indexName}_ind2 on @{indexName}_indx (id)");
 
@@ -63,7 +64,7 @@ public class App {
         mixed.setProperty("storedmap.driver.main", GenericJdbcDriver.class.getName());
         mixed.setProperty("storedmap.driver.additional", ElasticsearchDriver.class.getName());
 
-        Store store = Store.getStore(postgres);
+        Store store = Store.getStore(elasticsearch);
 
         String[] categoryNames = new String[]{
             "themap",
@@ -89,7 +90,9 @@ public class App {
                 } else if ((i & 1) != 0) {
                     map.tags(new String[]{"odd"});
                 }
-                map.sorter(i);
+                map.sorter(Instant.now());
+                //map.sorter(Integer.toString(i));
+                //map.sorter(i);
             }
 
         }
