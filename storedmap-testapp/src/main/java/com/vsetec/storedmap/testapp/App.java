@@ -74,46 +74,46 @@ public class App {
 
         Store store;
 
-//        store = Store.getStore(elasticsearch);
-//
-//        for (String cat : categoryNames) {
-//
-//            Category category = store.get(cat);
-//
-//            for (int i = 0; i < 4; i++) {
-//                StoredMap map = category.map("map" + i);
-//
-//                for (int j = 0; j < 2; j++) {
-//                    map.put("key" + j, "value" + j + " of map " + i + " in a category " + category.name());
-//                }
-//
-//                if (i == 3) {
-//                    map.tags(new String[]{"odd", "third"});
-//                } else if ((i & 1) != 0) {
-//                    map.tags(new String[]{"odd"});
-//                }
-//                //map.sorter(Instant.now());
-//                //map.sorter(Integer.toString(i));
-//                map.sorter(i);
-//            }
-//
-//        }
-//
-//        System.out.println("\nCategories:");
-//
-//        for (Category category : store.categories()) {
-//            System.out.println("\nMaps in category " + category.name() + ":");
-//            System.out.println("(internal name - " + category.internalIndexName() + ")");
-//            for (StoredMap map : category.maps()) {
-//                System.out.println("\nMap id:\t" + map.key());
-//                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
-//                for (Map.Entry<String, Object> entry : map.entrySet()) {
-//                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-//                }
-//            }
-//        }
-//
-//        store.close();
+        store = Store.getStore(elasticsearch);
+
+        for (String cat : categoryNames) {
+
+            Category category = store.get(cat);
+
+            for (int i = 0; i < 4; i++) {
+                StoredMap map = category.map("map" + i);
+
+                for (int j = 0; j < 2; j++) {
+                    map.put("key" + j, "value" + j + " of map " + i + " in a category " + category.name());
+                }
+
+                if (i == 3) {
+                    map.tags(new String[]{"odd", "third"});
+                } else if ((i & 1) != 0) {
+                    map.tags(new String[]{"odd"});
+                }
+                //map.sorter(Instant.now());
+                //map.sorter(Integer.toString(i));
+                map.sorter(i);
+            }
+
+        }
+
+        System.out.println("\nCategories:");
+
+        for (Category category : store.categories()) {
+            System.out.println("\nMaps in category " + category.name() + ":");
+            System.out.println("(internal name - " + category.internalIndexName() + ")");
+            for (StoredMap map : category.maps()) {
+                System.out.println("\nMap id:\t" + map.key());
+                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+                }
+            }
+        }
+
+        store.close();
         // restart the store to make sure all StoredMaps are persisted
         store = Store.getStore(elasticsearch);
 
