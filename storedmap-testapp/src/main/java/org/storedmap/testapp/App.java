@@ -84,7 +84,7 @@ public class App {
 
         Store store;
 
-        store = Store.getStore(elasticsearch);
+        store = Store.getStore(postgres);
 
         for (String cat : categoryNames) {
 
@@ -125,7 +125,7 @@ public class App {
 
         store.close();
         // restart the store to make sure all StoredMaps are persisted
-        store = Store.getStore(elasticsearch);
+        store = Store.getStore(postgres);
 
         System.out.println("\n***************************\nTags test:");
         for (Category category : store.categories()) {
