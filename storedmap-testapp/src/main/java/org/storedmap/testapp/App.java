@@ -42,19 +42,19 @@ public class App {
 //            System.out.println(i + ": \t" + b32.encodeAsString(Util.translateSorterIntoBytes(i, null, 32)));
 //        }
         Properties elasticsearch = new Properties();
-        elasticsearch.setProperty("storedmap.applicationCode", "testapp");
-        elasticsearch.setProperty("storedmap.driver", ElasticsearchDriver.class.getName());
-        elasticsearch.setProperty("storedmap.elasticsearch.host", "localhost");
-        elasticsearch.setProperty("storedmap.elasticsearch.port", "9200");
+        elasticsearch.setProperty("applicationCode", "testapp");
+        elasticsearch.setProperty("driver", ElasticsearchDriver.class.getName());
+        elasticsearch.setProperty("elasticsearch.host", "localhost");
+        elasticsearch.setProperty("elasticsearch.port", "9200");
 
         Properties postgres = new Properties();
-        postgres.setProperty("storedmap.applicationCode", "testapp");
-        postgres.setProperty("storedmap.driver", GenericJdbcDriver.class.getName());
-        postgres.setProperty("storedmap.jdbc.driver", "org.postgresql.Driver");
-        postgres.setProperty("storedmap.jdbc.url", "jdbc:postgresql://localhost:5432/testapp04");
-        postgres.setProperty("storedmap.jdbc.user", "postgres");
-        postgres.setProperty("storedmap.jdbc.password", "postgres");
-        postgres.setProperty("storedmap.jdbc.queries.create",
+        postgres.setProperty("applicationCode", "testapp");
+        postgres.setProperty("driver", GenericJdbcDriver.class.getName());
+        postgres.setProperty("jdbc.driver", "org.postgresql.Driver");
+        postgres.setProperty("jdbc.url", "jdbc:postgresql://localhost:5432/testapp04");
+        postgres.setProperty("jdbc.user", "postgres");
+        postgres.setProperty("jdbc.password", "postgres");
+        postgres.setProperty("jdbc.queries.create",
                 "create table @{indexName}_main (id varchar(200) primary key, val bytea);\n"
                 + "create table @{indexName}_lock (id varchar(200) primary key, createdat timestamp, waitfor integer);\n"
                 + "create table @{indexName}_indx (id varchar(200), tag varchar(200), sort bytea, map text, primary key (tag, id));\n"
@@ -62,17 +62,17 @@ public class App {
                 + "create index @{indexName}_ind2 on @{indexName}_indx (id)");
 
         Properties derby = new Properties();
-        derby.setProperty("storedmap.applicationCode", "testapp");
-        derby.setProperty("storedmap.driver", GenericJdbcDriver.class.getName());
-        derby.setProperty("storedmap.jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
-        derby.setProperty("storedmap.jdbc.url", "jdbc:derby:testapp;create=true");
+        derby.setProperty("applicationCode", "testapp");
+        derby.setProperty("driver", GenericJdbcDriver.class.getName());
+        derby.setProperty("jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
+        derby.setProperty("jdbc.url", "jdbc:derby:testapp;create=true");
 
         Properties mixed = new Properties();
         mixed.putAll(elasticsearch);
         mixed.putAll(postgres);
-        mixed.setProperty("storedmap.driver", MixedDriver.class.getName());
-        mixed.setProperty("storedmap.driver.main", GenericJdbcDriver.class.getName());
-        mixed.setProperty("storedmap.driver.additional", ElasticsearchDriver.class.getName());
+        mixed.setProperty("driver", MixedDriver.class.getName());
+        mixed.setProperty("driver.main", GenericJdbcDriver.class.getName());
+        mixed.setProperty("driver.additional", ElasticsearchDriver.class.getName());
 
         String[] categoryNames = new String[]{
             "themap",
@@ -84,7 +84,7 @@ public class App {
 
         Store store;
 
-        store = Store.getStore(postgres);
+        store = Store.getStore(elasticsearch);
 
         for (String cat : categoryNames) {
 
@@ -125,7 +125,7 @@ public class App {
 
         store.close();
         // restart the store to make sure all StoredMaps are persisted
-        store = Store.getStore(postgres);
+        store = Store.getStore(elasticsearch);
 
         System.out.println("\n***************************\nTags test:");
         for (Category category : store.categories()) {
