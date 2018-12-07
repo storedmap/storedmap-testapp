@@ -36,16 +36,11 @@ public class App {
 
     public static void main(String[] args) {
 
-//        Base32 b32 = new Base32(true);
-//        
-//        for(double i=-10.00; i<10.00; i=i+0.1){
-//            System.out.println(i + ": \t" + b32.encodeAsString(Util.translateSorterIntoBytes(i, null, 32)));
-//        }
-        Properties elasticsearch = new Properties();
-        elasticsearch.setProperty("applicationCode", "testapp");
-        elasticsearch.setProperty("driver", ElasticsearchDriver.class.getName());
-        elasticsearch.setProperty("elasticsearch.host", "localhost");
-        elasticsearch.setProperty("elasticsearch.port", "9200");
+//        Properties elasticsearch = new Properties();
+//        elasticsearch.setProperty("applicationCode", "testapp");
+//        elasticsearch.setProperty("driver", ElasticsearchDriver.class.getName());
+//        elasticsearch.setProperty("elasticsearch.host", "localhost");
+//        elasticsearch.setProperty("elasticsearch.port", "9200");
 
         Properties postgres = new Properties();
         postgres.setProperty("applicationCode", "testapp");
@@ -57,9 +52,10 @@ public class App {
         postgres.setProperty("jdbc.queries.create",
                 "create table @{indexName}_main (id varchar(200) primary key, val bytea);\n"
                 + "create table @{indexName}_lock (id varchar(200) primary key, createdat timestamp, waitfor integer);\n"
-                + "create table @{indexName}_indx (id varchar(200), tag varchar(200), sort bytea, map text, primary key (tag, id));\n"
+                + "create table @{indexName}_indx (id varchar(200), sec varchar(200), tag varchar(200), sort bytea, map text, primary key (tag, id));\n"
                 + "create index @{indexName}_ind1 on @{indexName}_indx (sort, tag);\n"
-                + "create index @{indexName}_ind2 on @{indexName}_indx (id)");
+                + "create index @{indexName}_ind2 on @{indexName}_indx (id);\n"
+                 + "create index @{indexName}_ind3 on @{indexName}_indx (sec, sort, tag)");
 
         Properties derby = new Properties();
         derby.setProperty("applicationCode", "testapp");
@@ -67,12 +63,12 @@ public class App {
         derby.setProperty("jdbc.driver", "org.apache.derby.jdbc.EmbeddedDriver");
         derby.setProperty("jdbc.url", "jdbc:derby:testapp;create=true");
 
-        Properties mixed = new Properties();
-        mixed.putAll(elasticsearch);
-        mixed.putAll(postgres);
-        mixed.setProperty("driver", MixedDriver.class.getName());
-        mixed.setProperty("driver.main", GenericJdbcDriver.class.getName());
-        mixed.setProperty("driver.additional", ElasticsearchDriver.class.getName());
+//        Properties mixed = new Properties();
+//        mixed.putAll(elasticsearch);
+//        mixed.putAll(postgres);
+//        mixed.setProperty("driver", MixedDriver.class.getName());
+//        mixed.setProperty("driver.main", GenericJdbcDriver.class.getName());
+//        mixed.setProperty("driver.additional", ElasticsearchDriver.class.getName());
 
         String[] categoryNames = new String[]{
             "themap",
@@ -84,7 +80,7 @@ public class App {
 
         Store store;
 
-        store = Store.getStore(elasticsearch);
+        store = Store.getStore(postgres);
 
         for (String cat : categoryNames) {
 
@@ -101,6 +97,8 @@ public class App {
                     map.tags(new String[]{"odd", "third"});
                 } else if ((i & 1) != 0) {
                     map.tags(new String[]{"odd"});
+                }else{
+                    map.secondaryKey("even");
                 }
                 //map.sorter(Instant.now());
                 //map.sorter(Integer.toString(i));
@@ -125,13 +123,13 @@ public class App {
 
         store.close();
         // restart the store to make sure all StoredMaps are persisted
-        store = Store.getStore(elasticsearch);
+        store = Store.getStore(postgres);
 
         System.out.println("\n***************************\nTags test:");
         for (Category category : store.categories()) {
-            long cnt = category.count(new String[]{"odd", "third"});
+            long cnt = category.count(null, null, null, new String[]{"odd", "third"}, null);
             System.out.println("\nMaps in category " + category.name() + " with odd and third tag - " + cnt + " items");
-            for (StoredMap map : category.maps(new String[]{"odd", "third"})) {
+            for (StoredMap map : category.maps(null, null, null, new String[]{"odd", "third"}, null, null)) {
                 System.out.println("\nMap id:\t" + map.key());
                 System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -142,9 +140,9 @@ public class App {
 
         System.out.println("\n***************************\nSorting and filtering test:");
         for (Category category : store.categories()) {
-            long cnt = category.count(0, 2);
+            long cnt = category.count(null, 0, 2, null, null);
             System.out.println("\nMaps in category " + category.name() + " from 0 to 2, ascending - " + cnt + " items");
-            for (StoredMap map : category.maps(0, 2, true)) {
+            for (StoredMap map : category.maps(null, 0, 2, null, true, null)) {
                 System.out.println("\nMap id:\t" + map.key());
                 System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -155,9 +153,9 @@ public class App {
 
         System.out.println("\n***************************\nTags and filtering test:");
         for (Category category : store.categories()) {
-            long cnt = category.count(1, 2, new String[]{"odd", "third"});
+            long cnt = category.count(null, 1, 2, new String[]{"odd", "third"}, null);
             System.out.println("\nMaps in category " + category.name() + " with odd and third tag ordered and filtered - " + cnt + " items");
-            for (StoredMap map : category.maps(1, 2, new String[]{"odd", "third"}, true)) {
+            for (StoredMap map : category.maps(null,1, 2, new String[]{"odd", "third"}, true, null)) {
                 System.out.println("\nMap id:\t" + map.key());
                 System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
