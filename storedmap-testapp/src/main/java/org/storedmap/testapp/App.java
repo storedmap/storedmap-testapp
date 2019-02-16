@@ -24,6 +24,7 @@ import org.storedmap.elasticsearch.ElasticsearchDriver;
 import org.storedmap.jdbc.GenericJdbcDriver;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Base32;
@@ -71,8 +72,9 @@ public class App {
         mixed.setProperty("driver.additional", ElasticsearchDriver.class.getName());
 
         String[] categoryNames = new String[]{
-            "themap",
-            "aMap"
+           // "themap",
+            //"aMap"
+            "random"
         //"very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very very Very LONG NAME",
         //"По-русски",
         //"_underscore"
@@ -84,25 +86,32 @@ public class App {
 
         for (String cat : categoryNames) {
 
-            Category category = store.get(cat);
+            for (int i = 0; i < 100; i++) {
 
-            for (int i = 0; i < 4; i++) {
-                StoredMap map = category.map("map" + i);
+
+                Category category = store.get(cat + (int)(Math.random()*4));
+
+
+
+                //StoredMap map1 = category.map("map" + i);
+                HashMap map = new HashMap();
 
                 for (int j = 0; j < 2; j++) {
                     map.put("key" + j, "value" + j + " of map " + i + " in a category " + category.name());
                 }
 
-                if (i == 3) {
-                    map.tags(new String[]{"odd", "third"});
-                } else if ((i & 1) != 0) {
-                    map.tags(new String[]{"odd"});
-                } else {
-                    map.secondaryKey("even");
-                }
-                //map.sorter(Instant.now());
-                //map.sorter(Integer.toString(i));
-                map.sorter(i);
+//                if (i == 3) {
+//                    map.tags(new String[]{"odd", "third"});
+//                } else if ((i & 1) != 0) {
+//                    map.tags(new String[]{"odd"});
+//                } else {
+//                    map.secondaryKey("even");
+//                }
+//                //map.sorter(Instant.now());
+//                //map.sorter(Integer.toString(i));
+//                map.sorter(i);
+
+                category.put("map" + i, map);
             }
 
         }
@@ -122,62 +131,64 @@ public class App {
         }
 
         store.close();
-        // restart the store to make sure all StoredMaps are persisted
-        store = Store.getStore(elasticsearch);
+        
+//        
+//        // restart the store to make sure all StoredMaps are persisted
+//        store = Store.getStore(elasticsearch);
+//
+//        System.out.println("\n***************************\nTags test:");
+//        for (Category category : store.categories()) {
+//            long cnt = category.count(null, null, null, new String[]{"odd", "third"}, null);
+//            System.out.println("\nMaps in category " + category.name() + " with odd and third tag - " + cnt + " items");
+//            for (StoredMap map : category.maps(null, null, null, new String[]{"odd", "third"}, null, null)) {
+//                System.out.println("\nMap id:\t" + map.key());
+//                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+//                for (Map.Entry<String, Object> entry : map.entrySet()) {
+//                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+//                }
+//            }
+//        }
+//
+//        System.out.println("\n***************************\nSorting and filtering test:");
+//        for (Category category : store.categories()) {
+//            long cnt = category.count(null, 0, 2, null, null);
+//            System.out.println("\nMaps in category " + category.name() + " from 0 to 2, ascending - " + cnt + " items");
+//            for (StoredMap map : category.maps(null, 0, 2, null, true, null)) {
+//                System.out.println("\nMap id:\t" + map.key());
+//                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+//                for (Map.Entry<String, Object> entry : map.entrySet()) {
+//                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+//                }
+//            }
+//        }
+//
+//        System.out.println("\n***************************\nTags and filtering test:");
+//        for (Category category : store.categories()) {
+//            long cnt = category.count(null, 1, 2, new String[]{"odd", "third"}, null);
+//            System.out.println("\nMaps in category " + category.name() + " with odd and third tag ordered and filtered - " + cnt + " items");
+//            for (StoredMap map : category.maps(null, 1, 2, new String[]{"odd", "third"}, true, null)) {
+//                System.out.println("\nMap id:\t" + map.key());
+//                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+//                for (Map.Entry<String, Object> entry : map.entrySet()) {
+//                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+//                }
+//            }
+//        }
+//
+//        System.out.println("\n***************************\nSecondary Key test:");
+//        for (Category category : store.categories()) {
+//            long cnt = category.count("even", null, null, null, null);
+//            System.out.println("\nMaps in category " + category.name() + " with even secondary key - " + cnt + " items");
+//            for (StoredMap map : category.maps("even", null, null, null, null, null)) {
+//                System.out.println("\nMap id:\t" + map.key());
+//                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+//                for (Map.Entry<String, Object> entry : map.entrySet()) {
+//                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
+//                }
+//            }
+//        }
 
-        System.out.println("\n***************************\nTags test:");
-        for (Category category : store.categories()) {
-            long cnt = category.count(null, null, null, new String[]{"odd", "third"}, null);
-            System.out.println("\nMaps in category " + category.name() + " with odd and third tag - " + cnt + " items");
-            for (StoredMap map : category.maps(null, null, null, new String[]{"odd", "third"}, null, null)) {
-                System.out.println("\nMap id:\t" + map.key());
-                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-                }
-            }
-        }
-
-        System.out.println("\n***************************\nSorting and filtering test:");
-        for (Category category : store.categories()) {
-            long cnt = category.count(null, 0, 2, null, null);
-            System.out.println("\nMaps in category " + category.name() + " from 0 to 2, ascending - " + cnt + " items");
-            for (StoredMap map : category.maps(null, 0, 2, null, true, null)) {
-                System.out.println("\nMap id:\t" + map.key());
-                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-                }
-            }
-        }
-
-        System.out.println("\n***************************\nTags and filtering test:");
-        for (Category category : store.categories()) {
-            long cnt = category.count(null, 1, 2, new String[]{"odd", "third"}, null);
-            System.out.println("\nMaps in category " + category.name() + " with odd and third tag ordered and filtered - " + cnt + " items");
-            for (StoredMap map : category.maps(null, 1, 2, new String[]{"odd", "third"}, true, null)) {
-                System.out.println("\nMap id:\t" + map.key());
-                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-                }
-            }
-        }
-
-        System.out.println("\n***************************\nSecondary Key test:");
-        for (Category category : store.categories()) {
-            long cnt = category.count("even", null, null, null, null);
-            System.out.println("\nMaps in category " + category.name() + " with even secondary key - " + cnt + " items");
-            for (StoredMap map : category.maps("even", null, null, null, null, null)) {
-                System.out.println("\nMap id:\t" + map.key());
-                System.out.println("Sorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
-                }
-            }
-        }
-
-        store.close();
+//        store.close();
 
     }
 }
