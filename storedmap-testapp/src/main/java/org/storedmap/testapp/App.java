@@ -52,7 +52,7 @@ public class App {
         postgres.setProperty("jdbc.password", "postgres");
         postgres.setProperty("jdbc.queries.create",
                 "create table @{indexName}_main (id varchar(200) primary key, val bytea);\n"
-                + "create table @{indexName}_lock (id varchar(200) primary key, createdat timestamp, waitfor integer);\n"
+                + "create table @{indexName}_lock (id varchar(200) primary key, createdat timestamp, waitfor integer, session varchar(200));\n"
                 + "create table @{indexName}_indx (id varchar(200), sec varchar(200), tag varchar(200), sort bytea, map text, primary key (tag, id));\n"
                 + "create index @{indexName}_ind1 on @{indexName}_indx (sort, tag);\n"
                 + "create index @{indexName}_ind2 on @{indexName}_indx (id);\n"
@@ -82,7 +82,7 @@ public class App {
 
         Store store;
 
-        store = Store.getStore(elasticsearch);
+        store = new Store(elasticsearch);
 
         for (String cat : categoryNames) {
 
@@ -123,7 +123,7 @@ public class App {
             System.out.println("(internal name - " + category.internalIndexName() + ")");
             for (StoredMap map : category.maps()) {
                 System.out.println("\nMap id:\t" + map.key());
-                System.out.println("Key:\t" + map.secondaryKey() + ",\tSorter:\t" + map.sorter() + ",\tTags:\t" + Arrays.toString(map.tags()));
+                System.out.println("Map Key:\t" + map.secondaryKey() + ",\tMap Sorter:\t" + map.sorter() + ",\tMap Tags:\t" + Arrays.toString(map.tags()));
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     System.out.println("Key:\t" + entry.getKey() + "\tvalue:\t" + entry.getValue());
                 }
